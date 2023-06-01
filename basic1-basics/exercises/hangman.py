@@ -205,8 +205,26 @@ def show_possible_matches(my_word):
     that has already been revealed.
 
     """
-    # TODO: FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    matching_word = []
+
+    for word in wordlist:
+        if len(word) != len(my_word):
+            continue
+
+        is_matching = True
+        for i in range(len(my_word)):
+            if my_word[i] == "*":
+                continue
+            elif my_word[i] != word[i]:
+                is_matching = False
+                break
+        
+        if is_matching:
+            matching_word.append(word)
+        
+    print("Matching words: ")
+    for word in matching_word:
+        print(word)
 
 
 def hangman_with_hints(secret_word):
@@ -252,17 +270,35 @@ def hangman_with_hints(secret_word):
         if len(input_guess) != 1 or input_guess not in string.ascii_lowercase:
             print("Invalid guess. Please enter another letter")
             continue
+
+        #Check if the input guess is a hint
+        if input_guess == "*":
+            show_possible_matches(get_guessed_word(secret_word, letters_guessed))
+            continue
+
         #Check if the input guess has already been made
         if input_guess in letters_guessed:
             print("You have already guesses that letter before. Try again")
             continue
 
+
+
         letters_guessed.append(input_guess)
+
+        #check if the input guess is correct
+        if input_guess in secret_word:
+            print("Well done!")
+        else:
+            print("That letter is not in the word")
+            guesses_remaining -= 1
+        
+        if is_word_guessed(secret_word, letters_guessed):
+            print("Congratulations! You guessed the word:", secret_word)
+        else:
+            print("Keep guessing!")
     
-    if is_word_guessed(secret_word, letters_guessed):
-        print("Congratulations! You guessed the word:", secret_word)
-    else:
-        print("Keep guessing!")
+    if guesses_remaining == 0:
+        print("Sorry, you ran out of guesses. The word was: ", secret_word)
 
 
 
