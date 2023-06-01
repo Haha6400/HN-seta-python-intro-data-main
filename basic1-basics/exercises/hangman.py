@@ -147,11 +147,21 @@ def hangman(secret_word):
             continue
 
         letters_guessed.append(input_guess)
+
+        #check if the input guess is correct
+        if input_guess in secret_word:
+            print("Well done!")
+        else:
+            print("That letter is not in the word")
+            guesses_remaining -= 1
+        
+        if is_word_guessed(secret_word, letters_guessed):
+            print("Congratulations! You guessed the word:", secret_word)
+        else:
+            print("Keep guessing!")
     
-    if is_word_guessed(secret_word, letters_guessed):
-        print("Congratulations! You guessed the word:", secret_word)
-    else:
-        print("Keep guessing!")
+    if guesses_remaining == 0:
+        print("Sorry, you ran out of guesses. The word was: ", secret_word)
 
 
 # When you've completed your hangman function, scroll down to the bottom
@@ -227,7 +237,33 @@ def hangman_with_hints(secret_word):
     Follows the other limitations detailed in the problem write-up.
     """
     # TODO: FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    guesses_remaining = 6
+    letters_guessed = []
+    print("The secret word contains", len(secret_word), "letters.")
+    print("You start with", guesses_remaining, "guesses.")
+    while guesses_remaining > 0:
+        print("You have", guesses_remaining, "guesses left")
+        print("Available letters: ", get_available_letters(letters_guessed))
+        print("Partially Guessed Word:", get_guessed_word(secret_word, letters_guessed))
+
+        input_guess = input("Please enter your guess: ").lower()
+
+        #Validate the input guess
+        if len(input_guess) != 1 or input_guess not in string.ascii_lowercase:
+            print("Invalid guess. Please enter another letter")
+            continue
+        #Check if the input guess has already been made
+        if input_guess in letters_guessed:
+            print("You have already guesses that letter before. Try again")
+            continue
+
+        letters_guessed.append(input_guess)
+    
+    if is_word_guessed(secret_word, letters_guessed):
+        print("Congratulations! You guessed the word:", secret_word)
+    else:
+        print("Keep guessing!")
+
 
 
 # When you've completed your hangman_with_hint function, comment the two similar
