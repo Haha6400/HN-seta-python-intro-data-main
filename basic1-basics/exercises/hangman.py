@@ -61,7 +61,11 @@ def is_word_guessed(secret_word, letters_guessed):
     letters_guessed: list (of letters), which letters have been guessed so far, assumes that all letters are lowercase
     returns: boolean, True if all the letters of secret_word are in letters_guessed, False otherwise
     """
-    # TODO: FILL IN YOUR CODE HERE AND DELETE "pass"
+    for letter in secret_word:
+        if letter not in letters_guessed:
+            return False
+    
+    return True
     
 
 
@@ -121,13 +125,33 @@ def hangman(secret_word):
 
     Follows the other limitations detailed in the problem write-up.
     """
-    # TODO: FILL IN YOUR CODE HERE AND DELETE "pass"
+
     guesses_remaining = 6
+    letters_guessed = []
     print("The secret word contains", len(secret_word), "letters.")
     print("You start with", guesses_remaining, "guesses.")
     while guesses_remaining > 0:
         print("You have", guesses_remaining, "guesses left")
         print("Available letters: ", get_available_letters(letters_guessed))
+        print("Partially Guessed Word:", get_guessed_word(secret_word, letters_guessed))
+
+        input_guess = input("Please enter your guess: ").lower()
+
+        #Validate the input guess
+        if len(input_guess) != 1 or input_guess not in string.ascii_lowercase:
+            print("Invalid guess. Please enter another letter")
+            continue
+        #Check if the input guess has already been made
+        if input_guess in letters_guessed:
+            print("You have already guesses that letter before. Try again")
+            continue
+
+        letters_guessed.append(input_guess)
+    
+    if is_word_guessed(secret_word, letters_guessed):
+        print("Congratulations! You guessed the word:", secret_word)
+    else:
+        print("Keep guessing!")
 
 
 # When you've completed your hangman function, scroll down to the bottom
