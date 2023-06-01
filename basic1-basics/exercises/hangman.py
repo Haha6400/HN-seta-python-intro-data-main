@@ -87,8 +87,13 @@ def get_available_letters(letters_guessed):
     letters_guessed: list (of letters), which letters have been guessed so far
     returns: string (of letters), comprised of letters that represents which letters have not yet been guessed.
     """
-    # TODO: FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    all_letters = string.ascii_lowercase
+    available_letters = ""
+    for letter in all_letters:
+        if letter not in letters_guessed:
+            available_letters += letter
+    
+    return available_letters
 
 
 def hangman(secret_word):
@@ -117,7 +122,12 @@ def hangman(secret_word):
     Follows the other limitations detailed in the problem write-up.
     """
     # TODO: FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    guesses_remaining = 6
+    print("The secret word contains", len(secret_word), "letters.")
+    print("You start with", guesses_remaining, "guesses.")
+    while guesses_remaining > 0:
+        print("You have", guesses_remaining, "guesses left")
+        print("Available letters: ", get_available_letters(letters_guessed))
 
 
 # When you've completed your hangman function, scroll down to the bottom
