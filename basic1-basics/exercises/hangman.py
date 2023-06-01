@@ -172,8 +172,16 @@ def match_with_gaps(my_word, other_word):
         _ , and my_word and other_word are of the same length;
         False otherwise:
     """
-    # TODO: FILL IN YOUR CODE HERE AND DELETE "pass"
-    pass
+    if len(my_word) != len(other_word):
+        return False
+    
+    for i in range(len(my_word)):
+        if(my_word[i] == "_"):
+            continue
+        elif my_word[i] != other_word[i]:
+            return False
+        
+    return True
 
 
 def show_possible_matches(my_word):
