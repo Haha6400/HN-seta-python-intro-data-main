@@ -57,14 +57,15 @@ def process(url):
 
 # Problem 1
 
-class NewStory:
+
+class NewsStory:
     def __init__(self, guid, title, description, link, pubdate):
         self.guid = guid
         self.title = title
         self.description = description
         self.link = link
         self.pubdate = pubdate
-    
+
     def get_guid(self):
         return self.guid
 
@@ -79,6 +80,7 @@ class NewStory:
 
     def get_pubdate(self):
         return self.pubdate
+
 
 # ======================
 # Triggers
@@ -97,46 +99,61 @@ class Trigger(object):
 
 # PHRASE TRIGGERS
 
+
 # Problem 2
 class PhraseTrigger(Trigger):
     def __init__(self, phrase):
         Trigger.__init__(self)
         self.phrase = phrase.lower()
-    
+
     def is_phrase_in(self, text):
+        """
+        Input: a string phrase as an argument to the class's constructor
+        Output: True if the whole phrase 'phrase' is present in text,
+                False otherwise, as described in the above examples.
+        """
         text = text.lower()
 
-        # Splitting a phrase into individual words
-        phrase_words_list = self.phrase.split()
-        text_words_list = text.split()
+        # Splitting a phrase into individual words and 
+        # removing any special characters within each word in the phrase
+        phrase_words_cleaned = [word.strip(string.punctuation) for word in self.phrase.split()]
+        text_words_cleaned = [word.strip(string.punctuation) for word in text.split()]
 
-        # Removing any special characters within each word in the phrase
-        phrase_words_cleaned = [word.strip(string.punctuation) for word in phrase_words_list]
-        text_words_cleaned = [word.strip(string.punctuation) for word in text_words_list]
-        
-        if (len(text_words_cleaned) < len(phrase_words_cleaned)):
+        if len(text_words_cleaned) < len(phrase_words_cleaned):
             return False
-        for i in range(len(text_words_cleaned)):
-            if text_words_cleaned[i:i + len(phrase_words_cleaned)] == phrase_words_cleaned:
+        for i in range(len(text_words_cleaned) - len(phrase_words_cleaned) + 1):
+            if (text_words_cleaned[i : i + len(phrase_words_cleaned)] == phrase_words_cleaned):
                 return True
         return False
 
+
 # Problem 3
+"""
+TitleTrigger that fires when a news item's 'title' contains a given phrase. 
+"""
+
+
 class TitleTrigger(PhraseTrigger):
     def __init__(self, phrase):
-        PhraseTrigger.__init__(self, phrase)
+        super().__init__(phrase)
 
     def evaluate(self, new_story):
         return self.is_phrase_in(new_story.get_title())
 
 
 # Problem 4
+"""
+DescriptionTrigger that fires when a news item's 'description' contains a given phrase. 
+"""
+
+
 class DescriptionTrigger(PhraseTrigger):
     def __init__(self, phrase):
-        PhraseTrigger.__init__(self, phrase)
+        super().__init__(phrase)
 
     def evaluate(self, new_story):
         return self.is_phrase_in(new_story.get_description())
+
 
 # TIME TRIGGERS
 
@@ -145,60 +162,84 @@ class DescriptionTrigger(PhraseTrigger):
 #        Input: Time has to be in EST and in the format of "%d %b %Y %H:%M:%S".
 #        Convert time from string to a datetime before saving it as an attribute.
 #  Ex: Input: "6 Apr 2003 12:00:00"
+
+
 class TimeTrigger(Trigger):
     def __init__(self, time_string):
-        self.date_time = datetime.strptime(time_string, "%d %b %Y %H:%M:%S") #2003-04-06 12:00:00
-    
-    def evaluate(self, new_story):
-        new_story_time = datetime.strptime(new_story.get_pubdate(), "%Y-%m-%d %H:%M:%S")
-        return new_story_time != self.date_time
+        # convert time from string to a datetime format
+        self.date_time = datetime.strptime(time_string, "%d %b %Y %H:%M:%S").replace(tzinfo=pytz.timezone("EST"))  # 2003-04-06 12:00:00
 
 
 # Problem 6
-class BeforeTrigger(TimeTrigger): 
-    def evaluate(self, new_story):
-        return super().evaluate(new_story) and new_story_time < self.date_time
+"""
+BeforeTrigger fires when a story is published strictly before the trigger’s time
+"""
 
-class AfterTrigger(TimeTrigger): 
+
+class BeforeTrigger(TimeTrigger):
     def evaluate(self, new_story):
-        return super().evaluate(new_story) and new_story_time > self.date_time
+        new_story_time = new_story.get_pubdate().replace(tzinfo=pytz.timezone("EST"))
+        return new_story_time < self.date_time
+
+
+"""
+AfterTrigger fires when a story is published strictly after the trigger’s time
+"""
+
+
+class AfterTrigger(TimeTrigger):
+    def evaluate(self, new_story):
+        new_story_time = new_story.get_pubdate().replace(tzinfo=pytz.timezone("EST"))
+        return new_story_time > self.date_time
 
 
 # COMPOSITE TRIGGERS
 
 # Problem 7
+"""
+Its output by inverting the output of another trigger
+"""
+
+
 class NotTrigger(Trigger):
     def __init__(self, trigger):
         self.trigger = trigger
-        
+
     def evaluate(self, new_story):
         return not self.trigger.evaluate(new_story)
+
 
 # Problem 8
 """
 This trigger should take two triggers as arguments to its constructor, 
 and should fire on a news story only if both of the inputted triggers would fire on that item.
 """
+
+
 class AndTrigger(Trigger):
-    def __init__(sefl, trigger1, trigger2):
+    def __init__(self, trigger1, trigger2):
         self.trigger1 = trigger1
-        self.trigger2 = triggere
+        self.trigger2 = trigger2
 
     def evaluate(self, new_story):
         return self.trigger1.evaluate(new_story) and self.trigger2.evaluate(new_story)
+
 
 # Problem 9
 """
 This trigger should take two triggers as arguments to its constructor, 
 and should fire if either one (or both) of its inputted triggers would fire on that item. 
 """
+
+
 class OrTrigger(Trigger):
-    def __init__(sefl, trigger1, trigger2):
+    def __init__(self, trigger1, trigger2):
         self.trigger1 = trigger1
-        self.trigger2 = triggere
+        self.trigger2 = trigger2
 
     def evaluate(self, new_story):
         return self.trigger1.evaluate(new_story) or self.trigger2.evaluate(new_story)
+
 
 # ======================
 # Filtering
@@ -217,7 +258,7 @@ def filter_stories(stories, triggerlist):
     filter_stories = []
     for story in stories:
         for trigger in triggerlist:
-            if (trigger.evaluate(story)):
+            if trigger.evaluate(story):
                 filter_stories.append(story)
                 break
     return filter_stories
@@ -241,34 +282,41 @@ def read_trigger_config(filename):
     for line in trigger_file:
         line = line.rstrip()
         if not (len(line) == 0 or line.startswith("//")):
-            line_part = line.split(',')
-            line_name = line_part[0].strip()
+            lines.append(line)
+
+    trigger_list = []
+    add_trigger = []
+
+    for line in lines:
+        line_part = line.split(",")
+        if line_part[0].strip() == "ADD":
+            for i in range(1, len(line_part)):
+                add_trigger.append(trigger_list[line_part[i]])
+            
+        else:
             line_type = line_part[1].strip()
 
-            if line_type == 'TITLE':
+            if line_type == "TITLE":
                 line_phrase = line_part[2].strip()
-                trigger = TittleTrigger(phrase)
-            elif line_type == 'DESCRIPTION':
+                trigger = TitleTrigger(line_phrase)
+            elif line_type == "DESCRIPTION":
                 line_phrase = line_part[2].strip()
-                trigger = DescriptionTrigger(phrase)
-            elif line_type == 'BEFORE':
+                trigger = DescriptionTrigger(line_phrase)
+            elif line_type == "BEFORE":
                 date_time = datetime.strptime(line_part[2].strip(), "%d %b %Y %H:%M:%S")
                 trigger = BeforeTrigger(date_time)
-            elif line_type == 'AFTER':
+            elif line_type == "AFTER":
                 date_time = datetime.strptime(line_part[2].strip(), "%d %b %Y %H:%M:%S")
                 trigger = AfterTrigger(date_time)
-            elif line_type == 'AND':
+            elif line_type == "AND":
                 trigger = AndTrigger(line_phrase[2], line_phrase[3])
-            elif line_type == 'OR':
+            elif line_type == "OR":
                 trigger = OrTrigger(line_phrase[2], line_phrase[3])
-            elif line_part[0] == 'ADD':
-                stories = [t1, t4]
-                triggerlist = []
-                triggerlist.append(trigger) for trigger in line_part[1:]
-                trigger = filter_stories(stories, triggerlist)
             else:
                 raise ValueError("Invalid trigger type")
-            lines.append(trigger)
+            trigger_list.append(trigger)
+        
+    return add_trigger
 
     # TODO: Problem 11
     # line is the list of lines that you need to parse and for which you need
@@ -292,7 +340,7 @@ def main_thread(master):
 
         # Problem 11
         # TODO: After implementing read_trigger_config, uncomment this line
-        triggerlist = read_trigger_config('triggers.txt')
+        triggerlist = read_trigger_config("triggers.txt")
 
         # HELPER CODE - you don't need to understand this!
         # Draws the popup window that displays the filtered stories
@@ -317,9 +365,17 @@ def main_thread(master):
         def get_cont(newstory):
             if newstory.get_guid() not in guidShown:
                 cont.insert(END, newstory.get_title() + "\n", "title")
-                cont.insert(END, "\n---------------------------------------------------------------\n", "title")
+                cont.insert(
+                    END,
+                    "\n---------------------------------------------------------------\n",
+                    "title",
+                )
                 cont.insert(END, newstory.get_description())
-                cont.insert(END, "\n*********************************************************************\n", "title")
+                cont.insert(
+                    END,
+                    "\n*********************************************************************\n",
+                    "title",
+                )
                 guidShown.append(newstory.get_guid())
 
         while True:
