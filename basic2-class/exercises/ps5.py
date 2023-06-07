@@ -37,6 +37,7 @@ def process(url):
         link = entry.link
         description = translate_html(entry.description)
         pubdate = translate_html(entry.published)
+        # print(type(pubdate))
 
         try:
             pubdate = datetime.strptime(pubdate, "%a, %d %b %Y %H:%M:%S %Z")
@@ -44,7 +45,9 @@ def process(url):
         #  pubdate = pubdate.astimezone(pytz.timezone('EST'))
         #  pubdate.replace(tzinfo=None)
         except ValueError:
-            pubdate = datetime.strptime(pubdate, "%a, %d %b %Y %H:%M:%S %z")
+            # pubdate = datetime.strptime(pubdate, "%a, %d %b %Y %H:%M:%S %z")
+            pubdate = datetime.strptime(pubdate, "%Y-%m-%D%T%H:%M:%SZ")
+            pubdate.replace(tzinfo=pytz.timezone("GMT"))
 
         newsStory = NewsStory(guid, title, description, link, pubdate)
         ret.append(newsStory)
@@ -116,11 +119,14 @@ class PhraseTrigger(Trigger):
 
         # Splitting a phrase into individual words and 
         # removing any special characters within each word in the phrase
-        phrase_words_cleaned = [word.strip(string.punctuation) for word in self.phrase.split()]
-        text_words_cleaned = [word.strip(string.punctuation) for word in text.split()]
+        for char in string.punctuation:
+            text = text.replace(char, ' ')
+        
+        phrase_words_cleaned = self.phrase.split()
+        text_words_cleaned = text.split()
 
-        if len(text_words_cleaned) < len(phrase_words_cleaned):
-            return False
+        # if len(text_words_cleaned) < len(phrase_words_cleaned):
+        #     return False
         for i in range(len(text_words_cleaned) - len(phrase_words_cleaned) + 1):
             if (text_words_cleaned[i : i + len(phrase_words_cleaned)] == phrase_words_cleaned):
                 return True
